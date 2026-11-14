@@ -39,3 +39,11 @@ Then I tried changing the architecture: adding one hidden layer inside the coupl
 
 ![RealNVP_2_Hidden_Layers_Loss.png](images/RealNVP_2_Hidden_Layers_Loss.png)
 Loss: -7.4559
+
+Then I just trained the same model on MNIST Fashion dataset and got the following results.
+
+![RealNVP_Fashion.png](images/RealNVP_Fashion.png)
+
+![RealNVP_Fashion_Loss.png](images/RealNVP_Fashion_Loss.png)
+
+Loss: -6.6809
