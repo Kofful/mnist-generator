@@ -3,3 +3,4 @@ data/
 models/
 results/
 vae_results/
+.venv/
