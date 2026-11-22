@@ -1,6 +1,8 @@
 # GenAI CV Homework
 - Author: Vladyslav Cherniuk
 
+GitHub: https://github.com/Kofful/mnist-generator
+
 First of all, I'd like to mention that all the models I tried are intended to fit into my laptop GPU - RTX 5070 Mobile. So the hyperparameters and model architectures were picked having the 8 GB VRAM in mind.
 
 ### 1. RealNVP
@@ -136,3 +138,78 @@ I also tried setting different $\beta$ and value 0.2 has improved the total loss
 - Total Loss: 0.0264
 - Reconstruction Loss: 0.0159
 - KL Divergence Loss: 0.0525
+
+### 3. GAN
+
+The same way as for RealNVP and VAE, I have used the GAN example from the lecture and adapted it for working with MNIST dataset images:
+- Removed unnecessary code;
+- Loaded the MNIST dataset;
+- Changed the layer sizes: 784 (28*28) input and output for flattened images, and 1024 hidden, so that it is greater than the number of pixels in the image;
+- Changed visualizations to use PCA;
+- Added visualizations of specific generated data samples;
+
+The resulting model had very poor generation and showed mode collapse:
+
+![GAN_Baseline.png](images/GAN_Baseline.png)
+
+I tried experimenting with linear layers architecture and couldn't achieve any decent results. The model always performed poorly and always had mode collapse around epoch 50, generating only ones and zeros. Also, the discriminator was always superior to the generator and had a very low loss.
+
+![GAN_Linear_Progress.png](images/GAN_Linear_Progress.png)
+
+![GAN_Linear_Generations.png](images/GAN_Linear_Generations.png)
+
+So then I've added convolutional layers.
+
+For generator there were:
+- First transpose convolutional layer from noise dimension 64 to 128 channels with kernel 7, stride 1 and padding 0;
+- Second transpose convolutional layer from 128 channels to 64 with kernel 4, stride 2 and padding 1;
+- Third transpose convolutional layer from 64 channels to 1 with kernel 4, stride 2 and padding 1;
+- 
+For discriminator there were:
+- First convolutional layer from 1 channels to 64 with kernel 4, stride 2 and padding 1;
+- Second convolutional layer from 64 channels to 128 with kernel 4, stride 2 and padding 1;
+- Third convolutional layer from 128 channels to 1 channel with kernel 7, stride 1 and padding 0;
+
+And the mode collapse has gone. The generation has become way better, the classes and generations within a class have become much more diverse.
+
+![GAN_CNN_Progress.png](images/GAN_CNN_Progress.png)
+
+![GAN_CNN.png](images/GAN_CNN_Generations.png)
+
+Then I tried experimenting with hyperparameters: learning rate, noise dimensions, and the number of channels in the convolutional layers. The final model had 16 noise dimensions, generator LR 4e-4, discriminator LR 2e-4 and inner channels sizes 64, 128.
+
+![GAN_Noise_Dim_16_Progress.png](images/GAN_Noise_Dim_16_Progress.png)
+
+![GAN_Noise_Dim_16_Generations.png](images/GAN_Noise_Dim_16_Generations.png)
+
+Then I've added conditional generation to average the loss in each class. The generation has improved much and the numbers were quite diverse.
+
+![GAN_Conditional_Progress.png](images/GAN_Conditional_Progress.png)
+
+![GAN_Conditional_Generations.png](images/GAN_Conditional_Generations.png)
+
+Then I've updated discriminator to return 7x7 grid of 18x18 patches, and it has improved the generator loss. The generation quality and diversity, however, stayed quite the same.
+
+![GAN_Patch_Progress.png](images/GAN_Patch_Progress.png)
+
+![GAN_Patch_Generations.png](images/GAN_Patch_Generations.png)
+
+Then I've added a discriminator feature matching loss to the generator, but the performance has dropped significantly.
+
+![GAN_Feature_Matching_Progress.png](images/GAN_Feature_Matching_Progress.png)
+
+![GAN_Feature_Matching_Generations.png](images/GAN_Feature_Matching_Generations.png)
+
+So I kept the previous model as the best one.
+
+After that, I tried to apply that model to MNIST Fashion dataset, and firstly the quality was quite poor.
+
+![GAN_Fashion_Progress.png](images/GAN_Fashion_Progress.png)
+
+![GAN_Fashion_Generations.png](images/GAN_Fashion_Generations.png)
+
+I tried making discriminator smaller, but it seemed more like an issue of generally small models. So I've experimented with network sizes - the best one was with 128 and 256 hidden channels.
+
+![GAN_Fashion_Maps_128_Progress.png](images/GAN_Fashion_Maps_128_Progress.png)
+
+![Gan_Fashion_Maps_128_Generations.png](images/Gan_Fashion_Maps_128_Generations.png)
